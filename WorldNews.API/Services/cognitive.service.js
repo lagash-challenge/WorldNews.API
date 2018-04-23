@@ -5,7 +5,7 @@ var request = require("request");
 var cognitiveServicesKey = "58ceed7e08524031bb087ae1292b5344";
 var keyphrasesUrl = "https://southcentralus.api.cognitive.microsoft.com/text/analytics/v2.0/keyPhrases";
 var sentimentUrl = "https://southcentralus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment";
-
+ 
 function sentiment(requestt, response) {
     console.log('POST - /api/cognitive/sentiment');
 
