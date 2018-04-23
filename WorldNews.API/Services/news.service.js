@@ -41,7 +41,7 @@ function createNews(req, res) {
         })
         return res.send(newList);;
     }
-   
+    
     
 }
 

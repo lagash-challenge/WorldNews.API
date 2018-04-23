@@ -6,7 +6,7 @@ const
     cognitive = require("./cognitive.service");
 
 module.exports = function (app) {
-
+ 
     /*Login*/
     app.post('/signin', login.signin);
     app.post('/signout', login.signout);

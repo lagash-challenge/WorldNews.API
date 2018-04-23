@@ -13,7 +13,7 @@ function sentiment(requestt, response) {
         headers:{
             "Ocp-Apim-Subscription-Key": cognitiveServicesKey,
             "Content-Type": "application/json",
-        },
+        }, 
         method: "POST",
         json: true,
         body: requestt.body,
