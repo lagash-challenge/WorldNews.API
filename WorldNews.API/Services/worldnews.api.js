@@ -2,7 +2,8 @@
 
 const
     login = require('./login.service'),
-    news = require('./news.service');
+    news = require('./news.service'),
+    cognitive = require("./cognitive.service");
 
 module.exports = function (app) {
 
@@ -15,4 +16,8 @@ module.exports = function (app) {
     app.post('/news', news.createNews);
     app.put('/news', news.updateNews);
     app.delete('/news', news.deleteNews);
+
+    /*Cognitivie*/
+    app.post("/cognitive/sentiment", cognitive.sentiment);
+    app.post("/cognitive/keyphrases", cognitive.keyphrases);
 };
