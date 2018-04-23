@@ -9,6 +9,9 @@
   "dependencies": {
     "azure": "2.0.0-preview",
     "body-parser": "1.17.0",
-    "express": "4.15.3"
+    "cors": "^2.8.4",
+    "express": "4.15.3",
+    "moment": "^2.22.1",
+    "uuid": "^3.2.1"
   }
 }
