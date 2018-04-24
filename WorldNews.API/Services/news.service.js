@@ -2,47 +2,45 @@
 
 const uuidv4 = require('uuid/v4');
 var fs = require('fs');
+var azureTable = require('azure-table-node');
+var postFeedTableName = "postfeed";
 var moment = require('moment');
+
 function createNews(req, res) {
     console.log('POST - /api/createNews');
     
     if (!validateNewsPost(req.body, res)) {
         return res.send("Invalid request");
     }
-    var fileName = "postfeed.json";    
+
+    var defaultClient = azureTable.getDefaultClient();
     try {
-        var contents = fs.readFileSync(fileName).toString();       
-        if (contents != null || contents != "") {
-            var filedata = JSON.parse(contents);
-            var postRequest = req.body;
-            postRequest.id = uuidv4();
-            postRequest.date = moment().format(); 
+        var id = uuidv4();
+        var partitionKey = "posts";
+        var now = moment();
 
-            filedata.push(req.body);
-
-            fs.writeFileSync(fileName, JSON.stringify(filedata), 'utf8', function () {
-                if (err) {
-                    return console.log(err);
-                }
-                return res.send(req.body);
-            });
-            return res.send(req.body);
-        }
+        var postRequest = req.body;
+        postRequest.id = id;
+        postRequest.date = now.format();
+        var dataEntity = {
+            PartitionKey: partitionKey,
+            RowKey: id,
+            Date: now.toDate(),
+            User: postRequest.user,
+            Sentiment: (postRequest.metaData || {}).sentiment,
+            Data: JSON.stringify(postRequest)
+        };
+        defaultClient.insertEntity(postFeedTableName, dataEntity, function (err, data) {
+            if (err) {
+                res.statusCode = 500;
+                res.statusText = err;
+            }
+            res.send(postRequest);
+        });
     }
     catch (e) {
-        var newList = [];
-        var postRequest = req.body;        
-        postRequest.id = uuidv4();
-        postRequest.timeUTC = moment().format(); 
-        newList.push = postRequest;
-
-        fs.writeFileSync(fileName, JSON.stringify(newList), { flag: 'wx', encoding: 'utf8' }, function (err, data) {
-            return res.send(data);
-        })
-        return res.send(newList);;
+        console.log(e);
     }
-    
-    
 }
 
 function validateNewsPost(req, res) {
@@ -68,8 +66,23 @@ function validateNewsPost(req, res) {
 
 function getNews(req, res) {
     console.log('GET - /api/getNews');
-    var fileName = "postfeed.json";    
-    res.send(readFile(fileName));    
+    var defaultClient = azureTable.getDefaultClient();
+    defaultClient.queryEntities(postFeedTableName, {
+        query: azureTable.Query.create('PartitionKey', '==', 'posts')
+    }, function (err, data, continuation) {
+        // err is null
+        // data contains the array of objects (entities)
+        // continuation is undefined or two element array to be passed to next query
+        if (err) {
+            res.statusCode = 500;
+            res.statusText = err;
+            res.send(data);
+        }
+        else {
+            var posts = data.map(entity => JSON.parse(entity.Data));
+            res.send(posts);
+        }
+    });    
 }
 
 function updateNews(req, res) {
